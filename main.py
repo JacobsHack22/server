@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sentence_transformers import SentenceTransformer, util
 from PIL import Image
 
+
 def create_app() -> Flask:
     app = Flask(__name__)
 
@@ -21,7 +22,8 @@ def create_app() -> Flask:
         imagefile = request.files.get('photo', '')
         img_np = to_gray_contrast(imagefile.read())
         tree_type = find_nearest(img_np)
-        return {'tree_type': tree_type}, 200
+        # generate_tree(tree_type)
+        return send_file('generated/' + tree_type + '/healthy.png', mimetype='image/png')
 
     def to_gray_contrast(str):
         nparr = np.fromstring(str, np.uint8)
@@ -33,6 +35,7 @@ def create_app() -> Flask:
         kernel = np.ones((3,3), np.uint8)
         closing = cv2.morphologyEx(im_bw_otsu, cv2.MORPH_CLOSE, kernel)
         img = closing.astype('float32')
+        
         #plt.imsave('govno_lolo.jpg', img, cmap='gray')
         return img
 
@@ -43,18 +46,17 @@ def create_app() -> Flask:
         dicts = lst[0]
         cnt = [0] * 10
         for dic in dicts:
-            print(str(dic['corpus_id']) + '   ' + str(dic['score']))
             cnt[int(dic['corpus_id'] / 75)] += 1
         max_index = cnt.index(max(cnt))
         return map_to_tree(max_index)
         
     def map_to_tree(id):
         if id == 0:
-            return 'Acer'
+            return 'acer'
         elif id == 1:
-            return 'Quercus'
+            return 'quercus'
         elif id == 2:
-            return 'Betula'
+            return 'betula'
         elif id == 3:
             return 'Sorbus'
         elif id == 4:
